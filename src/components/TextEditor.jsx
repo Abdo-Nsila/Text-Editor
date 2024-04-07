@@ -1,115 +1,50 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 function TextEditor() {
   const [lines, setLines] = useState([""]);
-  const [activeLineIndex, setActiveLineIndex] = useState(0);
-  const textareaRef = useRef(null);
+  const [currentLine, setCurrentLine] = useState(0);
+  const editorRef = useRef(null);
+
+  useEffect(() => {
+    editorRef.current.focus();
+  }, []);
+
+  const handleChange = (event) => {
+    setLines(event.target.value.split("\n"));
+  };
 
   const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      setLines([
-        ...lines.slice(0, activeLineIndex + 1),
-        "",
-        ...lines.slice(activeLineIndex + 1),
-      ]);
-      setActiveLineIndex(activeLineIndex + 1);
-    } else if (event.key === "Backspace" && lines[activeLineIndex] === "") {
-      setLines([
-        ...lines.slice(0, activeLineIndex),
-        ...lines.slice(activeLineIndex + 1),
-      ]);
-      setActiveLineIndex(Math.max(activeLineIndex - 1, 0));
-    } else if (event.key === "a" && event.ctrlKey) {
+    if (event.ctrlKey && event.key === "s") {
       event.preventDefault();
-      if (index === activeLineIndex) {
-        textareaRef.current.select();
-      }
+      const element = document.createElement("a");
+      const file = new Blob([lines.join("\n")], { type: "text/plain" });
+      element.href = URL.createObjectURL(file);
+      element.download = "myFile.txt";
+      document.body.appendChild(element); // Required for this to work in FireFox
+      element.click();
     }
   };
 
-  const handleChange = (event, index) => {
-    setLines([
-      ...lines.slice(0, index),
-      event.target.value,
-      ...lines.slice(index + 1),
-    ]);
-  };
-
-  const handleLineClick = (index) => {
-    setActiveLineIndex(index);
-    textareaRef.current.focus();
-  };
-
-  const handlePaste = (event) => {
-    event.preventDefault();
-    const pastedText = event.clipboardData.getData("text");
-    const pastedLines = pastedText.split("\n");
-
-    setLines([
-      ...lines.slice(0, activeLineIndex + 1),
-      ...pastedLines,
-      ...lines.slice(activeLineIndex + 1),
-    ]);
-    setActiveLineIndex(activeLineIndex + pastedLines.length);
-  };
-
   return (
-    <div className="h-[100vh] min-w-[100vw] w-auto bg-stone-900 overflow-x-scroll p-3">
-      <div className="line-numbers w-auto text-white">
-        {lines.map((line, index) => (
-          <div
-            key={index}
-            className={`${
-              index === activeLineIndex ? "active-line" : ""
-            } flex w-full h-6 items-center text-white`}
-            onClick={() => handleLineClick(index)}
-            onKeyDown={(event) => handleKeyDown(event, index)}
-            tabIndex={0}
-          >
-            <div className="h-full w-10!">{index + 1}</div>
-            {index === activeLineIndex ? (
-              <input
-                ref={textareaRef}
-                className="h-full min-w-full w-auto bg-transparent text-white text-sm space focus:ring-2 focus:ring-zinc-800 outline-none resize-none"
-                value={line}
-                onChange={(event) => handleChange(event, index)}
-                onKeyDown={(event) => handleKeyDown(event, index)}
-                onPaste={handlePaste}
-                onClick={(event) => event.stopPropagation()}
-                autoFocus
-              />
-            ) : (
-              <span
-                className="h-full min-w-full w-auto cursor-text text-white text-sm space focus:ring-2 focus:ring-transparent outline-none resize-none"
-                style={
-                  index === activeLineIndex
-                    ? { outline: "2px solid blue" }
-                    : { outline: "none" }
-                }
-              >
-                <pre>{line}</pre>
-              </span>
-            )}
+    <div className="flex bg-stone-900 min-h-[100vh] h-auto min-w-[100vw] w-auto overflow-x-scroll">
+      <div className="w-20 bg-stone-900 text-zinc-400 border-r border-gray-300 p-2">
+        {lines.map((_, index) => (
+          <div key={index} className="w-full text-center">
+            {index + 1}
           </div>
         ))}
       </div>
       <textarea
-        ref={textareaRef}
-        value={lines[activeLineIndex]}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        onPaste={handlePaste}
+        className="relative top-2 left-1 flex-1 bg-stone-900 text-[#6185cd] caret-white border-none outline-none  font-bold resize-none overflow-hidden whitespace-pre-wrap break-words"
         autoCorrect="off"
         autoCapitalize="off"
         spellCheck="false"
         aria-label="HTML Code Editor"
         tabIndex="0"
-        style={{
-          position: "fixed",
-          top: -1000,
-          left: 0,
-          opacity: 0,
-        }}
+        value={lines.join("\n")}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        ref={editorRef}
       />
     </div>
   );
