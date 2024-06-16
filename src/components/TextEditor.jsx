@@ -35,7 +35,7 @@ function TextEditor() {
         ))}
       </div>
       <textarea
-        className="relative top-2 left-1 flex-1 bg-stone-900 text-[#6185cd] caret-white border-none outline-none  font-bold resize-none overflow-hidden whitespace-pre-wrap break-words"
+        className="relative top-2 left-1 flex-1 bg-stone-900 text-[#6185cd] caret-white border-none outline-none font-bold resize-none overflow-hidden whitespace-pre-wrap break-words"
         autoCorrect="off"
         autoCapitalize="off"
         spellCheck="false"
